@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Three.js Interactive Scene</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Click and drag to rotate the cube. VR button will appear if supported.</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { VRButton } from 'three/addons/webxr/VRButton.js';
+        import { DragControls } from 'three/addons/controls/DragControls.js';
+
+        let camera, scene, renderer, cube;
+        let controller;
+        let controls, dragControls;
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            // Set background image
+            const loader = new THREE.TextureLoader();
+            const bgTexture = loader.load('https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg', () => {
+                const backgroundImage = new THREE.Mesh(
+                    new THREE.PlaneGeometry(window.innerWidth, window.innerHeight),
+                    new THREE.MeshBasicMaterial({ map: bgTexture })
+                );
+                backgroundImage.position.z = -500; // Position it far in the background
+                scene.add(backgroundImage);
+            });
+
+            // Create a cube
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            // Add lights
+            const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+            light.position.set(0, 20, 0);
+            scene.add(light);
+
+            camera.position.z = 5;
+
+            // Set up OrbitControls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            // Set up DragControls
+            dragControls = new DragControls([cube], camera, renderer.domElement);
+            dragControls.addEventListener('dragstart', function (event) {
+                controls.enabled = false;
+            });
+            dragControls.addEventListener('dragend', function (event) {
+                controls.enabled = true;
+            });
+
+            // Set up WebXR
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            // Controller
+            controller = renderer.xr.getController(0);
+            controller.addEventListener('selectstart', onSelectStart);
+            controller.addEventListener('selectend', onSelectEnd);
+            scene.add(controller);
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onSelectStart(event) {
+            this.userData.isSelecting = true;
+        }
+
+        function onSelectEnd(event) {
+            this.userData.isSelecting = false;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            if (controller.userData.isSelecting) {
+                // Move the cube when the controller button is pressed
+                cube.position.copy(controller.position);
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
