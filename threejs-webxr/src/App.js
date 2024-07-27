@@ -7,7 +7,6 @@ import Lights from './components/Lights';
 
 const App = () => {
   useEffect(() => {
-    // Access the WebGLRenderer instance from the Canvas context
     const renderer = document.querySelector('canvas').__threeFiber?.renderer;
     if (renderer) {
       document.body.appendChild(VRButton.createButton(renderer));
