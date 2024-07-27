@@ -40,7 +40,7 @@ const ThreeDScene = () => {
   return (
     <>
       <VRButton /> {/* For VR */}
-      <ARButton /> {/* For AR */}
+      <ARButton /> For AR
 
       <Canvas>
         <ambientLight />
