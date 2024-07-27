@@ -6,7 +6,7 @@ import { useDrag } from '@use-gesture/react';
 
 // Load the GLTF model
 const GLTFModel = ({ scale = [1, 1, 1], ...props }) => {
-  const { scene } = useGLTF('/Duck.glb'); // Adjust the path as needed
+  const { scene } = useGLTF('/Duck.glb');
   return <primitive object={scene} scale={scale} {...props} />;
 };
 
