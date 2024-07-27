@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <video id="video-background" autoplay loop muted playsinline>
+        <source src="/v2.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js";
+        import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js";
+
+        // Three.js scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Light setup
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(0, 0, 10);
+        scene.add(light);
+
+        // Load GLB file
+        const loader = new GLTFLoader();
+        loader.load('/Duck.glb', function(gltf) {
+            console.log('GLB model loaded successfully');
+            const model = gltf.scene;
+            scene.add(model);
+
+            // Center the model
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            model.position.sub(center);
+
+            // Adjust camera position based on model size
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+            camera.position.z = cameraZ * 1.5; // Adjust multiplier as needed
+            
+            camera.updateProjectionMatrix();
+        }, undefined, function(error) {
+            console.error('An error occurred while loading the 3D model:', error);
+        });
+
+        // Mouse interaction
+        let mouseDown = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousedown', onMouseDown, false);
+        document.addEventListener('mouseup', onMouseUp, false);
+        document.addEventListener('mousemove', onMouseMove, false);
+
+        function onMouseDown(event) {
+            mouseDown = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+
+        function onMouseUp(event) {
+            mouseDown = false;
+        }
+
+        function onMouseMove(event) {
+            if (mouseDown) {
+                const deltaX = event.clientX - mouseX;
+                const deltaY = event.clientY - mouseY;
+
+                scene.rotation.y += deltaX * 0.01;
+                scene.rotation.x += deltaY * 0.01;
+
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
