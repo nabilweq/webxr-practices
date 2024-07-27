@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable 3D Object Over Video</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; }
+        #container { position: relative; width: 100%; height: 100vh; }
+        #videoBackground { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        #threejsCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="videoBackground" autoplay muted loop>
+            <source src="/v1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <canvas id="threejsCanvas"></canvas>
+    </div>
+
+    <script>
+        // Set up Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threejsCanvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Create a cube
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        // Variables for dragging
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Event listeners for dragging
+        document.getElementById('threejsCanvas').addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        function onMouseDown(event) {
+            isDragging = true;
+        }
+
+        function onMouseMove(event) {
+            if (isDragging) {
+                const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y
+                };
+
+                cube.position.x += deltaMove.x * 0.01;
+                cube.position.y -= deltaMove.y * 0.01;
+            }
+
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onMouseUp(event) {
+            isDragging = false;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>

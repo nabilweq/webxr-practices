@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable GLB Object Over Video with WebXR</title>
+    <style>
+        body { margin: 0; }
+        #container { position: relative; width: 100%; height: 100vh; }
+        #videoBackground { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        #threejsCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="videoBackground" autoplay muted loop>
+            <source src="v2.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <canvas id="threejsCanvas"></canvas>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.128.0/build/three.module.js';
+        import { GLTFLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+        import { VRButton } from 'https://unpkg.com/three@0.128.0/examples/jsm/webxr/VRButton.js';
+        // import { ARButton } from 'https://unpkg.com/three@0.128.0/examples/jsm/webxr/ARButton.js'; // Uncomment for AR
+
+        // Set up Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threejsCanvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.xr.enabled = true;
+
+        // Add VR or AR button
+        document.body.appendChild(VRButton.createButton(renderer));
+        // document.body.appendChild(ARButton.createButton(renderer)); // Uncomment for AR
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(0, 1, 0);
+        scene.add(directionalLight);
+
+        // Load custom 3D model (GLB file)
+        let customObject;
+        const loader = new GLTFLoader();
+        loader.load(
+            'Duck.glb', // Replace with the path to your GLB file
+            function (gltf) {
+                customObject = gltf.scene;
+                scene.add(customObject);
+                
+                // Adjust the position and scale of the object if needed
+                customObject.position.set(0, 0, 0);
+                customObject.scale.set(1, 1, 1); // Adjust scale as needed
+            },
+            function (xhr) {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            function (error) {
+                console.error('An error happened', error);
+            }
+        );
+
+        camera.position.z = 5;
+
+        // Variables for dragging
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        // Render loop
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Event listeners for dragging
+        const canvas = document.getElementById('threejsCanvas');
+        canvas.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        function onMouseDown(event) {
+            isDragging = true;
+        }
+
+        function onMouseMove(event) {
+            if (isDragging && customObject) {
+                const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y
+                };
+
+                customObject.position.x += deltaMove.x * 0.01;
+                customObject.position.y -= deltaMove.y * 0.01;
+            }
+
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }
+
+        function onMouseUp(event) {
+            isDragging = false;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
