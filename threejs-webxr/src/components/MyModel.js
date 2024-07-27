@@ -4,7 +4,7 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useDrag } from '@use-gesture/react';
 
 const GLTFModel = () => {
-  const { scene } = useGLTF('/Duck.glb'); // Replace with the path to your .glb file
+  const { scene } = useGLTF('/Duck.glb');
 
   return (
     <primitive object={scene} />
