@@ -127,8 +127,8 @@
                 y: event.clientY - previousMousePosition.y
             };
 
-            const movementSpeed = 0.02;  // Reduced movement speed
-            const rotationSpeed = 0.002;  // Reduced rotation speed
+            const movementSpeed = 0.02;
+            const rotationSpeed = 0.002;
 
             if (isRotating) {
                 model.rotation.y += deltaMove.x * rotationSpeed;
@@ -162,7 +162,6 @@
             const mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             const mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-            // Create a raycaster and check for intersections with the model
             const raycaster = new THREE.Raycaster();
             const mouseVector = new THREE.Vector2(mouseX, mouseY);
             raycaster.setFromCamera(mouseVector, camera);
