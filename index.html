@@ -157,7 +157,6 @@
         }
 
         function isMouseOverModel(event) {
-            // Convert mouse position to normalized device coordinates
             const rect = renderer.domElement.getBoundingClientRect();
             const mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             const mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
