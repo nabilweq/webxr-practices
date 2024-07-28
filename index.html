@@ -81,7 +81,7 @@
             model = gltf.scene;
             scene.add(model);
 
-            model.scale.set(0.3, 0.3, 0.3);  // Make the model smaller
+            model.scale.set(0.3, 0.3, 0.3);
 
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
