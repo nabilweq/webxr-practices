@@ -81,11 +81,11 @@
                 // Set up DragControls
                 dragControls = new DragControls([glbModel], camera, renderer.domElement);
                 dragControls.addEventListener('dragstart', function (event) {
-                    controls.enabled = false; // Disable OrbitControls while dragging
+                    controls.enabled = false;
                     isDragging = true;
                 });
                 dragControls.addEventListener('dragend', function (event) {
-                    controls.enabled = true; // Re-enable OrbitControls after dragging
+                    controls.enabled = true;
                     isDragging = false;
                 });
             });
