@@ -100,12 +100,10 @@
 
             camera.position.z = 7;
 
-            // Set up OrbitControls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.target.set(0, 0, 0);
             controls.update();
 
-            // Set up WebXR
             document.body.appendChild(VRButton.createButton(renderer));
 
             // Controller
