@@ -106,13 +106,11 @@
 
             document.body.appendChild(VRButton.createButton(renderer));
 
-            // Controller
             controller = renderer.xr.getController(0);
             controller.addEventListener('selectstart', onSelectStart);
             controller.addEventListener('selectend', onSelectEnd);
             scene.add(controller);
 
-            // Listen for spacebar key press
             window.addEventListener('keydown', onKeyDown, false);
 
             window.addEventListener('resize', onWindowResize, false);
