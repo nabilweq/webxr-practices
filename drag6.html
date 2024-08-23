@@ -68,7 +68,7 @@
             renderer.xr.enabled = true;
             document.body.appendChild(renderer.domElement);
 
-            // Load GLB model
+            // Load model
             const loader = new GLTFLoader();
             loader.load('/Duck.glb', function (gltf) {
                 glbModel = gltf.scene;
