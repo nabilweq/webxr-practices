@@ -61,7 +61,7 @@
             document.body.appendChild(renderer.domElement);
 
             const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
-            sphereGeometry.scale(-0.5, 0.5, 0.5); // Invert the sphere to correctly map the texture inside
+            sphereGeometry.scale(-0.5, 0.5, 0.5);
             const sphereTexture = new THREE.TextureLoader().load('/360.jpg');
             const sphereMaterial = new THREE.MeshBasicMaterial({ map: sphereTexture });
             const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
